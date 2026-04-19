@@ -9,7 +9,7 @@ export class AuthService {
   constructor(private authRepository: AuthRepository) { }
 
   async register(body: RegisterRequest) {
-    const existing = await this.authRepository.findByEmail(body.email);
+    const existing = await this.authRepository.findUserByEmail(body.email);
     if (existing) throw new AppError(
       "User already exist",
       StatusCodes.CONFLICT,
@@ -25,12 +25,14 @@ export class AuthService {
       lastName: body.lastName,
     }
 
-    const user = await this.authRepository.create(authUser);
+    const user = await this.authRepository.createUser(authUser);
 
     const tokens = {
       accessToken: generateAccessToken({ userId: user.id, email: user.email }),
       refreshToken: generateRefreshToken()
     }
+
+    await this.authRepository.saveRefreshToken(user.id, tokens.refreshToken, 7 * 24 * 60 * 60);
 
     return { user, tokens }
   }
