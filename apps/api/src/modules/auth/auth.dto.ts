@@ -19,3 +19,10 @@ export const RegisterRequest = z.object({
 
 export type RegisterRequest = z.infer<typeof RegisterRequest>
 // export type RegisterResponse = z.infer<typeof RegisterResponse>
+
+export const LoginRequest = z.object({
+  email: z.email(),
+  password: z.string(),
+})
+
+export type LoginRequest = z.infer<typeof LoginRequest>

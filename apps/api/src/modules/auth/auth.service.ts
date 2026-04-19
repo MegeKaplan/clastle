@@ -1,16 +1,16 @@
 import { ReasonPhrases, StatusCodes } from 'http-status-codes';
 import { AppError } from '../../common/errors/app-error.js';
-import { RegisterRequest } from './auth.dto.js';
+import { LoginRequest, RegisterRequest } from './auth.dto.js';
 import { AuthUser } from './auth.model.js';
 import { AuthRepository } from './auth.repository.js';
-import { generateAccessToken, generateRefreshToken, hashPassword } from './auth.utils.js';
+import { generateAccessToken, generateRefreshToken, hashPassword, verifyPassword } from './auth.utils.js';
 
 export class AuthService {
   constructor(private authRepository: AuthRepository) { }
 
   async register(body: RegisterRequest) {
-    const existing = await this.authRepository.findUserByEmail(body.email);
-    if (existing) throw new AppError(
+    const existingUser = await this.authRepository.findUserByEmail(body.email);
+    if (existingUser) throw new AppError(
       "User already exist",
       StatusCodes.CONFLICT,
       ReasonPhrases.CONFLICT
@@ -35,5 +35,31 @@ export class AuthService {
     await this.authRepository.saveRefreshToken(user.id, tokens.refreshToken, 7 * 24 * 60 * 60);
 
     return { user, tokens }
+  }
+
+  async login(body: LoginRequest) {
+    const existingUser = await this.authRepository.findUserByEmail(body.email);
+    if (!existingUser) throw new AppError(
+      "User not found",
+      StatusCodes.NOT_FOUND,
+      ReasonPhrases.NOT_FOUND
+    )
+
+    if (!(await verifyPassword(body.password, existingUser.passwordHash))) {
+      throw new AppError(
+        "Invalid credentials",
+        StatusCodes.UNAUTHORIZED,
+        ReasonPhrases.UNAUTHORIZED
+      )
+    }
+
+    const tokens = {
+      accessToken: generateAccessToken({ userId: existingUser.id, email: existingUser.email }),
+      refreshToken: generateRefreshToken()
+    }
+
+    await this.authRepository.saveRefreshToken(existingUser.id, tokens.refreshToken, 7 * 24 * 60 * 60);
+
+    return { user: existingUser, tokens }
   }
 }

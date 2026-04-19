@@ -6,5 +6,6 @@ export class AuthRoutes {
 
   async setup() {
     this.app.post('/register', (req, res) => this.authController.register(req, res));
+    this.app.post('/login', (req, res) => this.authController.login(req, res));
   }
 }
