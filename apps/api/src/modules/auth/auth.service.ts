@@ -3,7 +3,7 @@ import { AppError } from '../../common/errors/app-error.js';
 import { LoginRequest, RegisterRequest } from './auth.dto.js';
 import { AuthUser } from './auth.model.js';
 import { AuthRepository } from './auth.repository.js';
-import { generateAccessToken, generateRefreshToken, hashPassword, verifyPassword } from './auth.utils.js';
+import { AccessTokenPayload, generateAccessToken, generateRefreshToken, hashPassword, verifyPassword } from './auth.utils.js';
 
 export class AuthService {
   constructor(private authRepository: AuthRepository) { }
@@ -23,12 +23,15 @@ export class AuthService {
       passwordHash,
       firstName: body.firstName,
       lastName: body.lastName,
+      role: "USER"
     }
 
     const user = await this.authRepository.createUser(authUser);
 
+    const tokenPayload: AccessTokenPayload = { userId: user.id, email: user.email, role: user.role };
+
     const tokens = {
-      accessToken: generateAccessToken({ userId: user.id, email: user.email }),
+      accessToken: generateAccessToken(tokenPayload),
       refreshToken: generateRefreshToken()
     }
 
@@ -53,8 +56,10 @@ export class AuthService {
       )
     }
 
+    const tokenPayload: AccessTokenPayload = { userId: existingUser.id, email: existingUser.email, role: existingUser.role };
+
     const tokens = {
-      accessToken: generateAccessToken({ userId: existingUser.id, email: existingUser.email }),
+      accessToken: generateAccessToken(tokenPayload),
       refreshToken: generateRefreshToken()
     }
 

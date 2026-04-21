@@ -2,10 +2,12 @@ import jwt from 'jsonwebtoken';
 import { randomBytes } from 'crypto';
 import app from '../../app.js';
 import argon2 from 'argon2';
+import { Role } from '../../generated/prisma/enums.js';
 
-export interface AccessTokenPayload {
+export type AccessTokenPayload = {
   userId: string;
   email: string;
+  role: Role;
 }
 
 export const generateAccessToken = (payload: AccessTokenPayload) => {

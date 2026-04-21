@@ -5,6 +5,7 @@ export const AuthUser = z.object({
   passwordHash: z.string(),
   firstName: z.string(),
   lastName: z.string(),
+  role: z.enum(["SUPERADMIN", "ADMIN", "USER"])
 })
 
 export type AuthUser = z.infer<typeof AuthUser>

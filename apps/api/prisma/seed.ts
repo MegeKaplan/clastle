@@ -11,7 +11,8 @@ async function seed() {
       firstName: "admin",
       lastName: "admin",
       email: "admin@admin.com",
-      passwordHash
+      passwordHash,
+      role: "SUPERADMIN",
     },
   });
   console.log("Created user:", user);
