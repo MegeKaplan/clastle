@@ -65,4 +65,16 @@ export class AuthController {
 
     reply.code(StatusCodes.OK).send({ message: 'User logged in successfully', user, tokens: { accessToken: tokens.accessToken } });
   }
+
+  async getMe(request: FastifyRequest, reply: FastifyReply) {
+    if (!request.user) {
+      throw new AppError(
+        "Unauthorized",
+        StatusCodes.UNAUTHORIZED,
+        ReasonPhrases.UNAUTHORIZED
+      )
+    }
+
+    reply.code(StatusCodes.OK).send({ user: request.user });
+  }
 }

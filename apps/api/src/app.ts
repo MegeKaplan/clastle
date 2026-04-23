@@ -30,6 +30,10 @@ app.setErrorHandler((err, req, reply) => {
 })
 
 app.register(fastifyAutoload, {
+  dir: join(__dirname, "plugins"),
+})
+
+app.register(fastifyAutoload, {
   dir: join(__dirname, 'modules'),
   matchFilter: (path) => path.endsWith("index.ts"),
   prefix: "/api"

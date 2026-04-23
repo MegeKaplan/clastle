@@ -1,17 +1,17 @@
 import jwt from 'jsonwebtoken';
 import { randomBytes } from 'crypto';
-import app from '../../app.js';
 import argon2 from 'argon2';
-import { Role } from '../../generated/prisma/enums.js';
+import { AccessTokenPayload } from '../../common/types/auth.js';
 
-export type AccessTokenPayload = {
-  userId: string;
-  email: string;
-  role: Role;
-}
+// export type AccessTokenPayload = {
+//   userId: string;
+//   email: string;
+//   role: Role;
+// }
+export type { AccessTokenPayload };
 
-export const generateAccessToken = (payload: AccessTokenPayload) => {
-  return jwt.sign(payload, app.config.JWT_SECRET, { expiresIn: '15m' });
+export const generateAccessToken = (payload: AccessTokenPayload, secret: string) => {
+  return jwt.sign(payload, secret, { expiresIn: '15m' });
 };
 
 export const generateRefreshToken = () => {

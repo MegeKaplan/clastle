@@ -4,6 +4,7 @@ import { LoginRequest, RegisterRequest } from './auth.dto.js';
 import { AuthUser } from './auth.model.js';
 import { AuthRepository } from './auth.repository.js';
 import { AccessTokenPayload, generateAccessToken, generateRefreshToken, hashPassword, verifyPassword } from './auth.utils.js';
+import app from '../../app.js';
 
 export class AuthService {
   constructor(private authRepository: AuthRepository) { }
@@ -31,7 +32,7 @@ export class AuthService {
     const tokenPayload: AccessTokenPayload = { userId: user.id, email: user.email, role: user.role };
 
     const tokens = {
-      accessToken: generateAccessToken(tokenPayload),
+      accessToken: generateAccessToken(tokenPayload, app.config.JWT_SECRET),
       refreshToken: generateRefreshToken()
     }
 
@@ -59,7 +60,7 @@ export class AuthService {
     const tokenPayload: AccessTokenPayload = { userId: existingUser.id, email: existingUser.email, role: existingUser.role };
 
     const tokens = {
-      accessToken: generateAccessToken(tokenPayload),
+      accessToken: generateAccessToken(tokenPayload, app.config.JWT_SECRET),
       refreshToken: generateRefreshToken()
     }
 

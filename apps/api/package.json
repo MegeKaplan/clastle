@@ -13,6 +13,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@casl/ability": "^6.8.1",
+    "@casl/prisma": "^1.6.2",
     "@fastify/autoload": "^6.3.1",
     "@fastify/cookie": "^11.0.2",
     "@fastify/env": "^6.0.0",
@@ -21,6 +23,7 @@
     "argon2": "^0.44.0",
     "dotenv": "^17.4.2",
     "fastify": "^5.8.5",
+    "fastify-plugin": "^5.1.0",
     "http-status-codes": "^2.3.0",
     "jsonwebtoken": "^9.0.3",
     "pg": "^8.20.0",
