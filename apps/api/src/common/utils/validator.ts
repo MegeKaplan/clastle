@@ -1,7 +1,7 @@
 import { z } from "zod"
 
-export const validateBody = (schema: z.ZodType, body: unknown) => {
-  const result = schema.safeParse(body)
+export const validate = (schema: z.ZodType, input: unknown) => {
+  const result = schema.safeParse(input);
 
   if (result.success) {
     return {

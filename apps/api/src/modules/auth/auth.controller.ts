@@ -1,7 +1,7 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
 import { AuthService } from './auth.service.js';
 import { LoginRequest, RegisterRequest } from './auth.dto.js';
-import { validateBody } from '../../common/utils/validator.js';
+import { validate } from '../../common/utils/validator.js';
 import { AppError } from '../../common/errors/app-error.js';
 import { ReasonPhrases, StatusCodes } from 'http-status-codes';
 
@@ -11,7 +11,7 @@ export class AuthController {
   async register(request: FastifyRequest, reply: FastifyReply) {
     const body = request.body as RegisterRequest
 
-    const { success, errors } = validateBody(RegisterRequest, body);
+    const { success, errors } = validate(RegisterRequest, body);
 
     if (!success) {
       throw new AppError(
@@ -40,7 +40,7 @@ export class AuthController {
   async login(request: FastifyRequest, reply: FastifyReply) {
     const body = request.body as LoginRequest
 
-    const { success, errors } = validateBody(LoginRequest, body);
+    const { success, errors } = validate(LoginRequest, body);
 
     if (!success) {
       throw new AppError(
