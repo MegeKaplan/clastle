@@ -13,6 +13,7 @@ async function seed() {
       email: "admin@admin.com",
       passwordHash,
       role: "SUPERADMIN",
+      status: "ACTIVE"
     },
   });
   console.log("Created user:", user);

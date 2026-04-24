@@ -29,4 +29,36 @@ export class UserController {
 
     return reply.send(users);
   }
+
+  async approveUser(request: FastifyRequest, reply: FastifyReply) {
+    const { id: userId } = request.params as { id: string };
+
+    if (!userId) {
+      throw new AppError(
+        "User ID is required",
+        StatusCodes.BAD_REQUEST,
+        ReasonPhrases.BAD_REQUEST
+      )
+    }
+
+    await this.userService.approveUser(request.userAbility, userId);
+
+    return reply.send({ message: 'User approved successfully' });
+  }
+
+  async rejectUser(request: FastifyRequest, reply: FastifyReply) {
+    const { id: userId } = request.params as { id: string };
+
+    if (!userId) {
+      throw new AppError(
+        "User ID is required",
+        StatusCodes.BAD_REQUEST,
+        ReasonPhrases.BAD_REQUEST
+      )
+    }
+
+    await this.userService.rejectUser(request.userAbility, userId);
+
+    return reply.send({ message: 'User rejected successfully' });
+  }
 }

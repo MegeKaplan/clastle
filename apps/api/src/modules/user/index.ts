@@ -14,3 +14,5 @@ export default async function userModule(app: FastifyInstance) {
 
   await userRoutes.setup();
 }
+
+export const autoPrefix = '/users';

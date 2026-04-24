@@ -1,6 +1,6 @@
 import { AbilityBuilder, PureAbility } from "@casl/ability";
 import { createPrismaAbility, PrismaQuery, Subjects } from "@casl/prisma";
-import { User } from "../../generated/prisma/client.js";
+import { Prisma, Role, User, UserStatus } from "../../generated/prisma/client.js";
 
 export type AppAbility = PureAbility<[string, 'all' | Subjects<{
   User: User;
@@ -19,15 +19,20 @@ export function defineRulesForUser(user?: User) {
     return builder.rules;
   }
 
+  if (user.status !== UserStatus.ACTIVE) {
+    defineGuestRules(builder);
+    return builder.rules;
+  }
+
   switch (user?.role) {
-    case 'SUPERADMIN':
+    case Role.SUPERADMIN:
       defineSuperAdminRules(builder);
       break;
-    case 'ADMIN':
+    case Role.ADMIN:
       defineAdminRules(builder);
       defineUserRules(builder, user);
       break;
-    case 'USER':
+    case Role.USER:
       defineUserRules(builder, user);
       defineGuestRules(builder);
       break;
@@ -43,15 +48,22 @@ function defineSuperAdminRules({ can }: AbilityBuilder<AppAbility>) {
 }
 
 function defineAdminRules({ can }: AbilityBuilder<AppAbility>) {
-  can(["update"], ["User"]);
+  can("approve", "User", {
+    role: Role.USER,
+    status: UserStatus.PENDING
+  } as Prisma.UserWhereInput);
+  can("reject", "User", {
+    role: Role.USER,
+    status: UserStatus.PENDING
+  } as Prisma.UserWhereInput);
 }
 
 function defineUserRules({ can }: AbilityBuilder<AppAbility>, user: User) {
-  can(["read", "create", "update"], ["User"], {
+  can(["read", "update"], "User", {
     id: user.id
   });
 }
 
 function defineGuestRules({ can }: AbilityBuilder<AppAbility>) {
-  can(["read"], ["User"]);
+  can("read", "User");
 }
