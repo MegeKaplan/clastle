@@ -6,11 +6,18 @@ import { dirname, join } from 'node:path'
 import fastifyAutoload from '@fastify/autoload'
 import { AppError } from './common/errors/app-error.js'
 import fastifyCookie, { FastifyCookieOptions } from '@fastify/cookie'
+import cors from '@fastify/cors'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
 
 const app = Fastify()
+
+await app.register(cors, {
+  origin: '*',
+  methods: ['*'],
+  allowedHeaders: ['*'],
+})
 
 app.register(fastifyEnv, {
   confKey: "config",
