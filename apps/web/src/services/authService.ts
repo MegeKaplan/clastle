@@ -18,6 +18,7 @@ const authService = {
   logout: () => {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("userId");
+    localStorage.removeItem("onboardingCompleted");
   }
 };
 

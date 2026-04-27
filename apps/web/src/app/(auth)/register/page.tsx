@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { getPostAuthRedirectPath } from "@/lib/onboardingStorage"
 import authService from "@/services/authService"
 import useAuthStore from "@/store/useAuthStore"
 import { ArrowRight } from "lucide-react"
@@ -26,8 +27,6 @@ const RegisterPage = () => {
   };
 
   const handleSubmit = async () => {
-    localStorage.clear();
-
     if (data.password !== data.confirmPassword) {
       toast.error("Passwords do not match");
       return;
@@ -40,7 +39,7 @@ const RegisterPage = () => {
       localStorage.setItem("userId", res.data.user.id);
 
       toast.success(res.data.message || "Account created successfully");
-      router.push("/");
+      router.push(getPostAuthRedirectPath());
     } catch (err: any) {
       const message = err?.response?.data?.message || err?.message || "Something went wrong";
       toast.error(message);
