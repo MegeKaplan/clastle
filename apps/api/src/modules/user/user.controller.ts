@@ -31,7 +31,7 @@ export class UserController {
   }
 
   async approveUser(request: FastifyRequest, reply: FastifyReply) {
-    const { id: userId } = request.params as { id: string };
+    const { userId } = request.params as { userId: string };
 
     if (!userId) {
       throw new AppError(
@@ -47,7 +47,7 @@ export class UserController {
   }
 
   async rejectUser(request: FastifyRequest, reply: FastifyReply) {
-    const { id: userId } = request.params as { id: string };
+    const { userId } = request.params as { userId: string };
 
     if (!userId) {
       throw new AppError(

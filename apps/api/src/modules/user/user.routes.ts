@@ -6,7 +6,7 @@ export class UserRoutes {
 
   async setup() {
     this.app.get('/', (req, res) => this.userController.getUsers(req, res));
-    this.app.post('/:id/approve', (req, res) => this.userController.approveUser(req, res));
-    this.app.post('/:id/reject', (req, res) => this.userController.rejectUser(req, res));
+    this.app.post('/:userId/approve', (req, res) => this.userController.approveUser(req, res));
+    this.app.post('/:userId/reject', (req, res) => this.userController.rejectUser(req, res));
   }
 }

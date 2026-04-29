@@ -1,9 +1,10 @@
 import { AbilityBuilder, PureAbility } from "@casl/ability";
 import { createPrismaAbility, PrismaQuery, Subjects } from "@casl/prisma";
-import { Prisma, Role, User, UserStatus } from "../../generated/prisma/client.js";
+import { Club, Prisma, Role, User, UserStatus } from "../../generated/prisma/client.js";
 
 export type AppAbility = PureAbility<[string, 'all' | Subjects<{
   User: User;
+  Club: Club;
 }>], PrismaQuery>;
 
 export function defineAbilityForUser(user?: User) {
@@ -15,6 +16,12 @@ export function defineRulesForUser(user?: User) {
   const builder = new AbilityBuilder<AppAbility>(createPrismaAbility);
 
   if (!user) {
+    defineGuestRules(builder);
+    return builder.rules;
+  }
+
+  if (user.status === UserStatus.PENDING) {
+    definePendingUserRules(builder);
     defineGuestRules(builder);
     return builder.rules;
   }
@@ -62,6 +69,11 @@ function defineUserRules({ can }: AbilityBuilder<AppAbility>, user: User) {
   can(["read", "update"], "User", {
     id: user.id
   });
+  can(["join", "leave"], "Club");
+}
+
+function definePendingUserRules({ can }: AbilityBuilder<AppAbility>) {
+  can("join", "Club");
 }
 
 function defineGuestRules({ can }: AbilityBuilder<AppAbility>) {

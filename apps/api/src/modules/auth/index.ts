@@ -15,3 +15,5 @@ export default async function authModule(app: FastifyInstance) {
 
   await authRoutes.setup();
 }
+
+export const autoPrefix = '/auth';
