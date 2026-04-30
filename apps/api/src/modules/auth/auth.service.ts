@@ -3,7 +3,8 @@ import { AppError } from '../../common/errors/app-error.js';
 import { LoginRequest, RegisterRequest } from './auth.dto.js';
 import { AuthUser } from './auth.model.js';
 import { AuthRepository } from './auth.repository.js';
-import { AccessTokenPayload, generateAccessToken, generateRefreshToken, hashPassword, verifyPassword } from './auth.utils.js';
+import { AccessTokenPayload, generateAccessToken, generateRefreshToken } from './auth.utils.js';
+import { hashPassword, verifyPassword } from '../../common/utils/password.js';
 import app from '../../app.js';
 
 export class AuthService {

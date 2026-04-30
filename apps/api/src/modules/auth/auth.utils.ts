@@ -18,10 +18,10 @@ export const generateRefreshToken = () => {
   return randomBytes(20).toString('hex');
 };
 
-export const hashPassword = async (password: string) => {
-  return await argon2.hash(password);
-};
+// export const hashPassword = async (password: string) => {
+//   return await argon2.hash(password);
+// };
 
-export const verifyPassword = async (password: string, hash: string) => {
-  return await argon2.verify(hash, password);
-};
+// export const verifyPassword = async (password: string, hash: string) => {
+//   return await argon2.verify(hash, password);
+// };
