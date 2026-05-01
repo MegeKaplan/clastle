@@ -21,7 +21,7 @@ export function defineRulesForUser(user?: User) {
   }
 
   if (user.status === UserStatus.PENDING) {
-    definePendingUserRules(builder);
+    definePendingUserRules(builder, user);
     defineGuestRules(builder);
     return builder.rules;
   }
@@ -72,8 +72,11 @@ function defineUserRules({ can }: AbilityBuilder<AppAbility>, user: User) {
   can(["join", "leave"], "Club");
 }
 
-function definePendingUserRules({ can }: AbilityBuilder<AppAbility>) {
+function definePendingUserRules({ can }: AbilityBuilder<AppAbility>, user?: User) {
   can("join", "Club");
+  can("update", "User", {
+    id: user?.id
+  } as Prisma.UserWhereInput);
 }
 
 function defineGuestRules({ can }: AbilityBuilder<AppAbility>) {
