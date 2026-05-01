@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { setOnboardingCompleted } from "@/lib/onboardingStorage"
 import authService from "@/services/authService"
 import useAuthStore from "@/store/useAuthStore"
 import { ArrowRight } from "lucide-react"
@@ -26,13 +27,12 @@ const LoginPage = () => {
   };
 
   const handleSubmit = async () => {
-    localStorage.clear();
-
     try {
       const res = await authService.login({ email: data.email, password: data.password });
 
       localStorage.setItem("accessToken", res.data.tokens.accessToken);
       localStorage.setItem("userId", res.data.user.id);
+      setOnboardingCompleted(true);
 
       toast.success(res.data.message || "Logged in successfully");
       router.push("/");
