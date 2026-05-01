@@ -13,7 +13,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { type ClubCategory, clubCategories } from "@/constants/onboardingQuestions";
-import { getOnboardingCompleted } from "@/lib/onboardingStorage";
+import { useAuth } from "@/components/AuthProvider";
 import useOnboardingStore from "@/store/useOnboardingStore";
 
 const clubNameMap: Record<ClubCategory, string> = {
@@ -28,16 +28,26 @@ const OnboardingResultPage = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { reset } = useOnboardingStore();
+  const { user, loading } = useAuth();
 
   const rawClub = searchParams.get("club");
   const isValidClub = rawClub ? clubCategories.includes(rawClub as ClubCategory) : false;
   const assignedClub = (isValidClub ? rawClub : "literature") as ClubCategory;
 
   useEffect(() => {
-    if (!getOnboardingCompleted()) {
+    if (loading) {
+      return;
+    }
+
+    if (!user) {
+      router.replace("/login");
+      return;
+    }
+
+    if (!user.onboardingCompleted) {
       router.replace("/onboarding");
     }
-  }, [router]);
+  }, [loading, router, user]);
 
   const handleGoHome = () => {
     reset();

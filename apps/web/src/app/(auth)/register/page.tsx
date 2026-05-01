@@ -10,15 +10,16 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { getPostAuthRedirectPath } from "@/lib/onboardingStorage"
 import authService from "@/services/authService"
 import useAuthStore from "@/store/useAuthStore"
+import { useAuth } from "@/components/AuthProvider"
 import { ArrowRight } from "lucide-react"
 import { useRouter } from "next/navigation";
 import { toast } from "sonner"
 
 const RegisterPage = () => {
   const { data, setData } = useAuthStore();
+  const { refresh } = useAuth();
   const router = useRouter();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -38,10 +39,14 @@ const RegisterPage = () => {
       localStorage.setItem("accessToken", res.data.tokens.accessToken);
       localStorage.setItem("userId", res.data.user.id);
 
+      await refresh();
+
       toast.success(res.data.message || "Account created successfully");
-      router.push(getPostAuthRedirectPath());
-    } catch (err: any) {
-      const message = err?.response?.data?.message || err?.message || "Something went wrong";
+      const hasCompletedOnboarding = Boolean(res.data?.user?.onboardingCompleted);
+      router.push(hasCompletedOnboarding ? "/home" : "/onboarding");
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { message?: string } }; message?: string })
+        ?.response?.data?.message || (err as { message?: string })?.message || "Something went wrong";
       toast.error(message);
     }
   };

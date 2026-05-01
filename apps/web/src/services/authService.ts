@@ -15,10 +15,10 @@ interface LoginData {
 const authService = {
   register: (data: RegisterData) => api.post("/auth/register", data),
   login: (data: LoginData) => api.post("/auth/login", data),
+  getMe: () => api.get("/auth/me"),
   logout: () => {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("userId");
-    localStorage.removeItem("onboardingCompleted");
   }
 };
 
