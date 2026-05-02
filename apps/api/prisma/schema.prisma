@@ -23,10 +23,11 @@ model User {
   onboardingCompleted Boolean    @default(false)
 
   memberships Membership[]
+  contents    Content[]
 
-  deletedAt DateTime?
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
   @@map("users")
 }
@@ -37,9 +38,11 @@ model Club {
   description String?
 
   memberships Membership[]
+  contents    Content[]
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
 
   @@map("clubs")
 }
@@ -59,6 +62,26 @@ model Membership {
   @@map("memberships")
 }
 
+model Content {
+  id         String      @id @default(uuid(7))
+  title      String?
+  body       String
+  type       ContentType
+  authorId   String
+  clubId     String?
+  expiresAt  DateTime?
+  visibility Visibility  @default(PUBLIC)
+
+  author User  @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  club   Club? @relation(fields: [clubId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  @@map("contents")
+}
+
 enum Role {
   SUPERADMIN
   ADMIN
@@ -69,4 +92,15 @@ enum UserStatus {
   PENDING
   ACTIVE
   REJECTED
+}
+
+enum ContentType {
+  POST
+  ANNOUNCEMENT
+}
+
+enum Visibility {
+  PUBLIC
+  CLUB_ONLY
+  PRIVATE
 }

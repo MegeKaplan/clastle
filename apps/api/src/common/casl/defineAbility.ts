@@ -1,10 +1,11 @@
 import { AbilityBuilder, PureAbility } from "@casl/ability";
 import { createPrismaAbility, PrismaQuery, Subjects } from "@casl/prisma";
-import { Club, Prisma, Role, User, UserStatus } from "../../generated/prisma/client.js";
+import { Club, Content, Prisma, Role, User, UserStatus } from "../../generated/prisma/client.js";
 
 export type AppAbility = PureAbility<[string, 'all' | Subjects<{
   User: User;
   Club: Club;
+  Content: Content;
 }>], PrismaQuery>;
 
 export function defineAbilityForUser(user?: User) {
@@ -55,14 +56,11 @@ function defineSuperAdminRules({ can }: AbilityBuilder<AppAbility>) {
 }
 
 function defineAdminRules({ can }: AbilityBuilder<AppAbility>) {
-  can("approve", "User", {
+  can(["approve", "reject"], "User", {
     role: Role.USER,
     status: UserStatus.PENDING
   } as Prisma.UserWhereInput);
-  can("reject", "User", {
-    role: Role.USER,
-    status: UserStatus.PENDING
-  } as Prisma.UserWhereInput);
+  can("update", "Content");
 }
 
 function defineUserRules({ can }: AbilityBuilder<AppAbility>, user: User) {
@@ -70,6 +68,9 @@ function defineUserRules({ can }: AbilityBuilder<AppAbility>, user: User) {
     id: user.id
   });
   can(["join", "leave"], "Club");
+  can(["create", "update"], "Content", {
+    authorId: user.id
+  } as Prisma.ContentWhereInput);
 }
 
 function definePendingUserRules({ can }: AbilityBuilder<AppAbility>, user?: User) {
@@ -81,4 +82,5 @@ function definePendingUserRules({ can }: AbilityBuilder<AppAbility>, user?: User
 
 function defineGuestRules({ can }: AbilityBuilder<AppAbility>) {
   can("read", "User");
+  can("read", "Content");
 }
