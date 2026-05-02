@@ -14,32 +14,38 @@ import {
 } from "@/components/ui/card";
 import { onboardingQuestions } from "@/constants/onboardingQuestions";
 import { calculateClub } from "@/lib/calculateClub";
-import {
-  getOnboardingCompleted,
-  setOnboardingAssignedClub,
-  setOnboardingCompleted,
-} from "@/lib/onboardingStorage";
+import { useAuth } from "@/components/AuthProvider";
+import userService from "@/services/userService";
 import useOnboardingStore from "@/store/useOnboardingStore";
 import { toast } from "sonner";
 
 const OnboardingPage = () => {
   const router = useRouter();
   const { currentStep, answers, setAnswer, nextStep } = useOnboardingStore();
+  const { user, loading, refresh } = useAuth();
 
   const totalSteps = onboardingQuestions.length;
   const safeStep = Math.min(currentStep, totalSteps - 1);
   const question = onboardingQuestions[safeStep];
   const selectedOptionIndex = answers[question.id];
   const canContinue = typeof selectedOptionIndex === "number";
-  const progress = ((safeStep + 1) / totalSteps) * 100;
 
   useEffect(() => {
-    if (getOnboardingCompleted()) {
-      router.replace("/");
+    if (loading) {
+      return;
     }
-  }, [router]);
 
-  const handleContinue = () => {
+    if (!user) {
+      router.replace("/login");
+      return;
+    }
+
+    if (user.onboardingCompleted) {
+      router.replace("/home");
+    }
+  }, [loading, router, user]);
+
+  const handleContinue = async () => {
     if (!canContinue) {
       toast.error("Please select an option to continue.");
       return;
@@ -53,9 +59,20 @@ const OnboardingPage = () => {
     }
 
     const assignedClub = calculateClub(answers);
-    setOnboardingAssignedClub(assignedClub);
-    setOnboardingCompleted(true);
-    router.push(`/onboarding/result?club=${assignedClub}`);
+
+    try {
+      if (!user?.id) {
+        throw new Error("User not found");
+      }
+
+      await userService.updateUser(user.id, { onboardingCompleted: true });
+      await refresh();
+      router.push(`/onboarding/result?club=${assignedClub}`);
+    } catch (err: unknown) {
+      const message = (err as { response?: { data?: { message?: string } }; message?: string })
+        ?.response?.data?.message || (err as { message?: string })?.message || "Something went wrong";
+      toast.error(message);
+    }
   };
 
   return (
@@ -65,9 +82,11 @@ const OnboardingPage = () => {
           <p className="text-xs font-medium tracking-wide uppercase text-muted-foreground">
             Step {safeStep + 1} of {totalSteps}
           </p>
-          <div className="h-2 w-full rounded-full bg-muted mt-2 overflow-hidden">
-            <div className="h-full bg-primary transition-all duration-300" style={{ width: `${progress}%` }} />
-          </div>
+          <progress
+            value={safeStep + 1}
+            max={totalSteps}
+            className="mt-2 h-2 w-full overflow-hidden rounded-full bg-muted [&::-webkit-progress-bar]:bg-muted [&::-webkit-progress-value]:bg-primary [&::-moz-progress-bar]:bg-primary"
+          />
         </div>
         <CardTitle className="text-3xl font-bold">Student Onboarding</CardTitle>
         <CardDescription className="text-base font-medium leading-relaxed text-foreground">
