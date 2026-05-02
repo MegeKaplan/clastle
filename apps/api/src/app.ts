@@ -28,6 +28,8 @@ app.register(fastifyEnv, {
 app.setErrorHandler((err, req, reply) => {
   const isAppError = err instanceof AppError
 
+  console.error(err)
+
   reply.status(isAppError ? err.statusCode : 500).send({
     success: false,
     message: isAppError ? err.message : "Something went wrong",

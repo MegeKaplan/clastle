@@ -36,6 +36,7 @@ model Club {
   id          String  @id @default(uuid(7))
   name        String
   description String?
+  slug        String  @unique
 
   memberships Membership[]
   contents    Content[]

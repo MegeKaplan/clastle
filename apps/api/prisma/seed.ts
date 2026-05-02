@@ -30,11 +30,11 @@ async function seed() {
   // Create default clubs
   try {
     const defaultClubs = [
-      { name: "Literature Club", description: "Default description for Literature Club" },
-      { name: "Foreign Language Club", description: "Default description for Foreign Language Club" },
-      { name: "Art Club", description: "Default description for Art Club" },
-      { name: "Music Club", description: "Default description for Music Club" },
-      { name: "Digital Games Club", description: "Default description for Digital Games Club" },
+      { name: "Literature Club", description: "Default description for Literature Club", slug: "literature-club" },
+      { name: "Foreign Language Club", description: "Default description for Foreign Language Club", slug: "foreign-language-club" },
+      { name: "Art Club", description: "Default description for Art Club", slug: "art-club" },
+      { name: "Music Club", description: "Default description for Music Club", slug: "music-club" },
+      { name: "Digital Games Club", description: "Default description for Digital Games Club", slug: "digital-games-club" },
     ];
 
     const createdClubs = await prisma.club.createMany({
