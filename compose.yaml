@@ -1,6 +1,7 @@
 services:
   postgres:
     image: postgres:17
+    container_name: clastle_postgres
     restart: unless-stopped
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
@@ -15,6 +16,7 @@ services:
 
   pgadmin:
     image: dpage/pgadmin4
+    container_name: clastle_pgadmin
     restart: unless-stopped
     environment:
       - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
@@ -30,6 +32,7 @@ services:
 
   redis:
     image: redis:8
+    container_name: clastle_redis
     restart: unless-stopped
     ports:
       - "${REDIS_PORT}:6379"
@@ -38,6 +41,35 @@ services:
     networks:
       - clastle_network
     command: redis-server --requirepass ${REDIS_PASSWORD} --appendonly yes
+
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: clastle_api
+    ports:
+      - "${API_PORT}:3001"
+    env_file:
+      - ./apps/api/.env
+    networks:
+      - clastle_network
+    depends_on:
+      - postgres
+      - redis
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    container_name: clastle_web
+    ports:
+      - "${WEB_PORT}:3000"
+    env_file:
+      - ./apps/web/.env
+    networks:
+      - clastle_network
+    depends_on:
+      - api
 
 volumes:
   postgres_data:

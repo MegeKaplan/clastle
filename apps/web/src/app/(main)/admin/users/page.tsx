@@ -102,7 +102,7 @@ const UsersAdminPage = () => {
   const handleSave = async (userId: string) => {
     setIsSaving(true);
     try {
-      await userService.updateUser(userId, editForm);
+      await userService.updateUser(userId, editForm as any);
       toast.success("User updated successfully");
       setEditingId(null);
       loadData();
@@ -157,14 +157,12 @@ const UsersAdminPage = () => {
                         {editingId === user.id ? (
                           <div className="flex gap-2">
                             <Input 
-                              size="sm"
                               className="h-9"
                               value={editForm.firstName}
                               onChange={e => setEditForm({...editForm, firstName: e.target.value})}
                               placeholder="First Name"
                             />
                             <Input 
-                              size="sm"
                               className="h-9"
                               value={editForm.lastName}
                               onChange={e => setEditForm({...editForm, lastName: e.target.value})}

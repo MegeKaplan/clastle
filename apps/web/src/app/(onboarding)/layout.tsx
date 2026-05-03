@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 const OnboardingLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <div className="w-full h-screen">
