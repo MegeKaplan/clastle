@@ -59,7 +59,7 @@ const Navbar = () => {
 
   return (
     <header className="sticky top-0 z-40 border-b bg-background/90 backdrop-blur">
-      <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-4 sm:px-6">
+      <div className="mx-auto flex h-16 w-full max-w-6xl items-center justify-between px-6 sm:px-8">
         <Link href="/home" className="flex items-center gap-2">
           <span className="flex size-9 items-center justify-center rounded-xl bg-primary/10 text-primary">
             <Shield className="size-4" />
@@ -75,7 +75,7 @@ const Navbar = () => {
             const isActive = pathname === href || pathname?.startsWith(`${href}/`);
             return (
               <Link key={href} href={href}>
-                <Button variant={isActive ? "secondary" : "ghost"} size="sm" className="gap-2">
+                <Button variant={isActive ? "secondary" : "ghost"} size="default" className="gap-2 px-5">
                   <Icon className="size-4" />
                   {label}
                 </Button>
@@ -91,33 +91,33 @@ const Navbar = () => {
             <div className="relative" ref={menuRef}>
               <Button
                 variant="outline"
-                size="sm"
-                className="gap-2 rounded-full"
+                size="default"
+                className="gap-3 rounded-full pl-2 pr-4 py-6 border-border/60 hover:bg-muted/50"
                 onClick={() => setMenuOpen((prev) => !prev)}
                 aria-expanded={menuOpen}
               >
-                <span className="flex size-7 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+                <span className="flex size-9 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
                   {initials}
                 </span>
-                <span className="hidden text-sm sm:inline">{user.firstName || "Account"}</span>
-                <ChevronDown className={cn("size-4 transition", menuOpen && "rotate-180")} />
+                <span className="hidden text-sm font-medium sm:inline">{user.firstName || "Account"}</span>
+                <ChevronDown className={cn("size-4 text-muted-foreground transition", menuOpen && "rotate-180")} />
               </Button>
 
               {menuOpen ? (
-                <div className="absolute right-0 mt-2 w-64 rounded-xl border bg-background p-3 shadow-lg">
-                  <div className="space-y-1 border-b pb-3">
-                    <div className="text-sm font-semibold text-foreground">
+                <div className="absolute right-0 mt-2 w-72 rounded-xl border bg-background p-4 shadow-lg">
+                  <div className="space-y-1.5 border-b pb-4">
+                    <div className="text-base font-semibold text-foreground">
                       {user.firstName} {user.lastName}
                     </div>
-                    <div className="text-xs text-muted-foreground">{user.email}</div>
-                    {user.role ? <Badge variant="outline">{user.role}</Badge> : null}
+                    <div className="text-sm text-muted-foreground truncate">{user.email}</div>
+                    {user.role ? <Badge variant="secondary" className="mt-1">{user.role}</Badge> : null}
                   </div>
 
                   <div className="mt-3 grid gap-1">
                     <Button
                       variant="ghost"
-                      size="sm"
-                      className="justify-start"
+                      size="default"
+                      className="justify-start px-3 py-2 h-auto"
                       onClick={() => {
                         setMenuOpen(false);
                         router.push("/profile");
@@ -128,8 +128,8 @@ const Navbar = () => {
                     {isAdmin ? (
                       <Button
                         variant="ghost"
-                        size="sm"
-                        className="justify-start"
+                        size="default"
+                        className="justify-start px-3 py-2 h-auto"
                         onClick={() => {
                           setMenuOpen(false);
                           router.push("/admin/users");
@@ -140,8 +140,8 @@ const Navbar = () => {
                     ) : null}
                     <Button
                       variant="ghost"
-                      size="sm"
-                      className="justify-start text-destructive"
+                      size="default"
+                      className="justify-start px-3 py-2 h-auto text-destructive hover:text-destructive hover:bg-destructive/10"
                       onClick={handleLogout}
                     >
                       <LogOut className="mr-2 size-4" />

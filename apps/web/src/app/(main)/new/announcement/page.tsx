@@ -13,7 +13,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
 import contentService from "@/services/contentService";
 
-const NewPostPage = () => {
+const NewAnnouncementPage = () => {
   const router = useRouter();
   const { user } = useAuth();
   const [title, setTitle] = useState("");
@@ -31,7 +31,7 @@ const NewPostPage = () => {
     }
 
     if (!activeClub?.id) {
-      toast.error("You must be part of a club to post.");
+      toast.error("You must be part of a club to post an announcement.");
       return;
     }
 
@@ -45,11 +45,11 @@ const NewPostPage = () => {
       await contentService.createContent({
         title,
         body: content,
-        type: "POST",
+        type: "ANNOUNCEMENT",
         authorId: user.id,
         clubId: activeClub.id,
       });
-      toast.success("Post published successfully!");
+      toast.success("Announcement published successfully!");
       router.push("/home");
     } catch (err: unknown) {
       const message = (err as { response?: { data?: { message?: string } }; message?: string })
@@ -63,26 +63,26 @@ const NewPostPage = () => {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Create a post</CardTitle>
-        <CardDescription>Share an update with your club.</CardDescription>
+        <CardTitle>Create an announcement</CardTitle>
+        <CardDescription>Share an important announcement with your club.</CardDescription>
       </CardHeader>
       <CardContent>
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div className="space-y-2">
-            <Label htmlFor="post-title">Title</Label>
+            <Label htmlFor="announcement-title">Title</Label>
             <Input
-              id="post-title"
-              placeholder="Share your update"
+              id="announcement-title"
+              placeholder="Announcement title"
               value={title}
               onChange={(event) => setTitle(event.target.value)}
               className="h-11"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="post-content">Content</Label>
+            <Label htmlFor="announcement-content">Content</Label>
             <Textarea
-              id="post-content"
-              placeholder="Write something helpful for your club"
+              id="announcement-content"
+              placeholder="Write the details of your announcement"
               value={content}
               onChange={(event) => setContent(event.target.value)}
             />
@@ -101,7 +101,7 @@ const NewPostPage = () => {
             <p className="text-xs text-muted-foreground">You are posting as a member of this club.</p>
           </div>
           <Button type="submit" className="w-full h-11" disabled={isSubmitting || !activeClub}>
-            {isSubmitting ? "Publishing..." : "Publish Post"}
+            {isSubmitting ? "Publishing..." : "Publish Announcement"}
           </Button>
         </form>
       </CardContent>
@@ -109,4 +109,4 @@ const NewPostPage = () => {
   );
 };
 
-export default NewPostPage;
+export default NewAnnouncementPage;

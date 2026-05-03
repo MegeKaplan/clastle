@@ -3,6 +3,7 @@
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 import authService from "@/services/authService";
+import userService from "@/services/userService";
 
 export type AuthUser = {
   id: string;
@@ -13,6 +14,8 @@ export type AuthUser = {
   onboardingCompleted?: boolean;
   createdAt?: string;
   status?: string;
+  clubs?: any[];
+  memberships?: any[];
 };
 
 type AuthContextValue = {
@@ -45,10 +48,52 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     setLoading(true);
     try {
+      const storedUser = window.localStorage.getItem("user");
+      if (storedUser) {
+        setUser(JSON.parse(storedUser));
+      }
+
       const res = await authService.getMe();
-      setUser(res.data?.user ?? null);
+      let fetchedUser = res.data?.user ?? null;
+
+      // Fallback to fetch clubs info
+      if (fetchedUser) {
+        try {
+          const usersRes = await userService.getUsers();
+          const usersData = Array.isArray(usersRes.data?.data)
+            ? usersRes.data.data
+            : Array.isArray(usersRes.data?.users)
+            ? usersRes.data.users
+            : Array.isArray(usersRes.data)
+            ? usersRes.data
+            : [];
+            
+          const fullUser = usersData.find((u: any) => u.id === fetchedUser.id);
+          
+          if (fullUser) {
+            // Robust mapping if backend didn't map it already
+            const clubs = fullUser.clubs || fullUser.memberships?.map((m: any) => m.club) || [];
+            
+            fetchedUser = { 
+              ...fetchedUser, 
+              ...fullUser,
+              clubs
+            };
+          }
+        } catch (error) {
+          console.error("Failed to fetch full user info", error);
+        }
+      }
+
+      setUser(fetchedUser);
+      if (fetchedUser) {
+        window.localStorage.setItem("user", JSON.stringify(fetchedUser));
+      } else {
+        window.localStorage.removeItem("user");
+      }
     } catch {
       setUser(null);
+      window.localStorage.removeItem("user");
     } finally {
       setLoading(false);
     }
@@ -56,6 +101,7 @@ const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const signOut = useCallback(() => {
     authService.logout();
+    window.localStorage.removeItem("user");
     setUser(null);
   }, []);
 

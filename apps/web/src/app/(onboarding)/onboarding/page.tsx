@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ import { onboardingQuestions } from "@/constants/onboardingQuestions";
 import { calculateClub } from "@/lib/calculateClub";
 import { useAuth } from "@/components/AuthProvider";
 import userService from "@/services/userService";
+import clubService from "@/services/clubService";
 import useOnboardingStore from "@/store/useOnboardingStore";
 import { toast } from "sonner";
 
@@ -30,6 +31,9 @@ const OnboardingPage = () => {
   const selectedOptionIndex = answers[question.id];
   const canContinue = typeof selectedOptionIndex === "number";
 
+  const isSubmittingRef = useRef(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   useEffect(() => {
     if (loading) {
       return;
@@ -40,7 +44,8 @@ const OnboardingPage = () => {
       return;
     }
 
-    if (user.onboardingCompleted) {
+    // Don't redirect if we just completed onboarding (navigating to result)
+    if (user.onboardingCompleted && !isSubmittingRef.current) {
       router.replace("/home");
     }
   }, [loading, router, user]);
@@ -60,15 +65,43 @@ const OnboardingPage = () => {
 
     const assignedClub = calculateClub(answers);
 
+    setIsSubmitting(true);
+    isSubmittingRef.current = true;
     try {
       if (!user?.id) {
         throw new Error("User not found");
       }
 
+      // 1. Get clubs list
+      const clubsRes = await clubService.getClubs();
+      const clubs = clubsRes.data;
+
+      // Category → slug mapping (from seed.ts)
+      const categorySlugMap: Record<string, string> = {
+        literature: "literature-club",
+        foreign_language: "foreign-language-club",
+        art: "art-club",
+        music: "music-club",
+        digital_gaming: "digital-games-club",
+      };
+
+      const targetSlug = categorySlugMap[assignedClub];
+
+      // 2. Find club by slug first, fallback to name
+      const targetClub = clubs.find((c: any) => c.slug === targetSlug)
+        ?? clubs.find((c: any) => c.name?.toLowerCase().includes(assignedClub.replace("_", " ")));
+      if (targetClub) {
+        await clubService.joinClub(targetClub.id);
+      }
+
+      // 3. Only then mark onboarding as complete
       await userService.updateUser(user.id, { onboardingCompleted: true });
       await refresh();
+
       router.push(`/onboarding/result?club=${assignedClub}`);
     } catch (err: unknown) {
+      isSubmittingRef.current = false;
+      setIsSubmitting(false);
       const message = (err as { response?: { data?: { message?: string } }; message?: string })
         ?.response?.data?.message || (err as { message?: string })?.message || "Something went wrong";
       toast.error(message);
@@ -104,11 +137,10 @@ const OnboardingPage = () => {
                 key={option.label}
                 type="button"
                 onClick={() => setAnswer(question.id, index)}
-                className={`w-full text-left rounded-xl border px-4 py-3 text-sm transition ${
-                  isSelected
+                className={`w-full text-left rounded-xl border px-4 py-3 text-sm transition ${isSelected
                     ? "border-primary bg-primary/12 text-foreground shadow-sm"
                     : "border-border bg-background text-foreground hover:border-primary/40 hover:bg-muted"
-                }`}
+                  }`}
               >
                 {option.label}
               </button>
@@ -123,9 +155,9 @@ const OnboardingPage = () => {
           size="lg"
           className="h-11 w-full rounded-xl text-sm font-semibold cursor-pointer"
           onClick={handleContinue}
-          disabled={!canContinue}
+          disabled={!canContinue || isSubmitting}
         >
-          {safeStep === totalSteps - 1 ? "See my club" : "Continue"}
+          {isSubmitting ? "Setting up your club..." : safeStep === totalSteps - 1 ? "See my club" : "Continue"}
           <ArrowRight className="size-4" />
         </Button>
       </CardFooter>

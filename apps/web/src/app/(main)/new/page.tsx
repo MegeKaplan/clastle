@@ -16,13 +16,13 @@ const NewContentPage = () => {
           <CardDescription>Choose what you want to create today.</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 md:grid-cols-3">
-          <Button disabled className="h-12 w-full">
+          <Button className="h-12 w-full" onClick={() => router.push("/new/announcement")}>
             Create Announcement
           </Button>
           <Button className="h-12 w-full" onClick={() => router.push("/new/post")}>
             Create Post
           </Button>
-          <Button disabled className="h-12 w-full" variant="outline">
+          <Button className="h-12 w-full" variant="outline" onClick={() => router.push("/new/club")}>
             Create Club
           </Button>
         </CardContent>

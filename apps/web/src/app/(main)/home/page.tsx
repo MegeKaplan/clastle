@@ -8,6 +8,7 @@ import RouteGuard from "@/components/RouteGuard";
 import SectionHeader from "@/components/SectionHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useAuth } from "@/components/AuthProvider";
 import contentService, { Announcement, ClubPost } from "@/services/contentService";
 
 const formatDate = (value?: string) => {
@@ -21,15 +22,15 @@ const formatDate = (value?: string) => {
 
 const AnnouncementCard = ({ announcement }: { announcement: Announcement }) => {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base font-semibold">{announcement.title}</CardTitle>
+    <Card className="hover:shadow-md transition-shadow">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg font-semibold">{announcement.title}</CardTitle>
         <CardDescription className="text-xs text-muted-foreground">
           {formatDate(announcement.createdAt)}
           {announcement.authorName ? ` • ${announcement.authorName}` : ""}
         </CardDescription>
       </CardHeader>
-      <CardContent className="text-sm text-muted-foreground">
+      <CardContent className="text-sm text-foreground leading-relaxed">
         {announcement.body}
       </CardContent>
     </Card>
@@ -38,22 +39,23 @@ const AnnouncementCard = ({ announcement }: { announcement: Announcement }) => {
 
 const PostCard = ({ post }: { post: ClubPost }) => {
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="text-base font-semibold">{post.title}</CardTitle>
+    <Card className="hover:shadow-md transition-shadow">
+      <CardHeader className="pb-3">
+        <CardTitle className="text-lg font-semibold">{post.title}</CardTitle>
         <CardDescription className="text-xs text-muted-foreground">
           {formatDate(post.createdAt)}
           {post.authorName ? ` • ${post.authorName}` : ""}
         </CardDescription>
       </CardHeader>
-      <CardContent className="text-sm text-muted-foreground">
-        {post.content}
+      <CardContent className="text-sm text-foreground leading-relaxed">
+        {post.body}
       </CardContent>
     </Card>
   );
 };
 
 export default function Home() {
+  const { user } = useAuth();
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [posts, setPosts] = useState<ClubPost[]>([]);
   const [loading, setLoading] = useState(true);
@@ -62,10 +64,17 @@ export default function Home() {
     let mounted = true;
 
     const load = async () => {
+      const clubId = user?.memberships?.[0]?.club?.id || user?.clubs?.[0]?.id;
+      
+      if (!clubId) {
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
       const [nextAnnouncements, nextPosts] = await Promise.all([
-        contentService.getAnnouncements(),
-        contentService.getPosts(),
+        contentService.getAnnouncements(clubId),
+        contentService.getPosts(clubId),
       ]);
 
       if (!mounted) {
@@ -77,12 +86,14 @@ export default function Home() {
       setLoading(false);
     };
 
-    void load();
+    if (user) {
+      void load();
+    }
 
     return () => {
       mounted = false;
     };
-  }, []);
+  }, [user]);
 
   return (
     <RouteGuard requireAuth redirectTo="/">

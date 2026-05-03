@@ -38,6 +38,11 @@ const RouteGuard = ({
 
     if (requireAdmin && !isAdmin(user?.role)) {
       router.replace("/home");
+      return;
+    }
+
+    if (!user?.onboardingCompleted && !isAdmin(user?.role) && requireAuth) {
+      router.replace("/onboarding");
     }
   }, [loading, redirectTo, requireAuth, requireAdmin, router, user]);
 

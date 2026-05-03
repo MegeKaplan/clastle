@@ -11,7 +11,7 @@ export type Announcement = {
 export type ClubPost = {
   id: string;
   title: string;
-  content: string;
+  body: string;
   createdAt?: string;
   authorName?: string;
 };
@@ -25,22 +25,25 @@ const normalizeList = <T,>(data: unknown): T[] => {
 };
 
 const contentService = {
-  getAnnouncements: async (): Promise<Announcement[]> => {
+  getAnnouncements: async (clubId: string): Promise<Announcement[]> => {
     try {
-      const res = await api.get("/clubs/current/announcements");
-      return normalizeList<Announcement>(res.data?.announcements ?? res.data);
+      const res = await api.get(`/contents`, { params: { type: "ANNOUNCEMENT", clubId } });
+      return normalizeList<Announcement>(res.data ?? []);
     } catch {
       return [];
     }
   },
-  getPosts: async (): Promise<ClubPost[]> => {
+  getPosts: async (clubId: string): Promise<ClubPost[]> => {
     try {
-      const res = await api.get("/clubs/current/posts");
-      return normalizeList<ClubPost>(res.data?.posts ?? res.data);
+      const res = await api.get(`/contents`, { params: { type: "POST", clubId } });
+      return normalizeList<ClubPost>(res.data ?? []);
     } catch {
       return [];
     }
   },
+  createContent: async (data: { title?: string; body: string; type: "POST" | "ANNOUNCEMENT"; authorId: string; clubId: string }) => {
+    return api.post("/contents", data);
+  }
 };
 
 export default contentService;

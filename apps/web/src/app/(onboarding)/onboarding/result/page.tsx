@@ -21,7 +21,7 @@ const clubNameMap: Record<ClubCategory, string> = {
   foreign_language: "Foreign Language Club",
   art: "Art Club",
   music: "Music Club",
-  digital_gaming: "Digital Gaming Club",
+  digital_gaming: "Digital Games Club",
 };
 
 const OnboardingResultPage = () => {
@@ -44,14 +44,16 @@ const OnboardingResultPage = () => {
       return;
     }
 
+    // Only redirect back if they somehow landed here without completing onboarding
     if (!user.onboardingCompleted) {
       router.replace("/onboarding");
     }
+    // If onboardingCompleted=true, stay on this page and show the result
   }, [loading, router, user]);
 
   const handleGoHome = () => {
     reset();
-    router.push("/");
+    router.push("/home");
   };
 
   return (

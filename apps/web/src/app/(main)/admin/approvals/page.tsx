@@ -122,43 +122,43 @@ const ApprovalsAdminPage = () => {
             </div>
           ) : pendingUsers.length > 0 ? (
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[600px] border-separate border-spacing-y-2 text-sm">
-                <thead className="text-left text-xs uppercase text-muted-foreground">
-                  <tr>
-                    <th className="px-3 py-2">Name</th>
-                    <th className="px-3 py-2">Email</th>
-                    <th className="px-3 py-2">Role</th>
-                    <th className="px-3 py-2">Status</th>
-                    <th className="px-3 py-2 text-right">Actions</th>
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b text-left text-xs uppercase text-muted-foreground">
+                    <th className="px-4 py-3 font-medium">Name</th>
+                    <th className="px-4 py-3 font-medium">Email</th>
+                    <th className="px-4 py-3 font-medium">Role</th>
+                    <th className="px-4 py-3 font-medium">Status</th>
+                    <th className="px-4 py-3 font-medium text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y">
                   {pendingUsers.map((user) => (
-                    <tr key={user.id} className="rounded-lg bg-muted/40">
-                      <td className="px-3 py-3 font-medium text-foreground">
+                    <tr key={user.id} className="group hover:bg-muted/30 transition-colors">
+                      <td className="px-4 py-4 font-medium text-foreground">
                         {user.firstName} {user.lastName}
                       </td>
-                      <td className="px-3 py-3 text-muted-foreground">{user.email}</td>
-                      <td className="px-3 py-3">
-                        {user.role ? <Badge variant="outline">{user.role}</Badge> : "-"}
+                      <td className="px-4 py-4 text-muted-foreground">{user.email}</td>
+                      <td className="px-4 py-4">
+                        {user.role ? <Badge variant="secondary">{user.role}</Badge> : "-"}
                       </td>
-                      <td className="px-3 py-3">
+                      <td className="px-4 py-4">
                         <StatusBadge status={formatStatusValue("PENDING") as UserStatusValue} />
                       </td>
-                      <td className="px-3 py-3">
+                      <td className="px-4 py-4">
                         <div className="flex justify-end gap-2">
                           <Button
+                            size="sm"
                             onClick={() => handleApprove(user.id)}
                             disabled={actionUserId === user.id}
-                            className="h-10"
                           >
                             Approve
                           </Button>
                           <Button
+                            size="sm"
                             variant="outline"
                             onClick={() => handleReject(user.id)}
                             disabled={actionUserId === user.id}
-                            className="h-10"
                           >
                             Reject
                           </Button>

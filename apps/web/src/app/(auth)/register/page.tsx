@@ -38,6 +38,7 @@ const RegisterPage = () => {
 
       localStorage.setItem("accessToken", res.data.tokens.accessToken);
       localStorage.setItem("userId", res.data.user.id);
+      localStorage.setItem("user", JSON.stringify(res.data.user));
 
       await refresh();
 
