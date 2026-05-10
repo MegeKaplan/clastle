@@ -16,6 +16,16 @@ export type ClubPost = {
   authorName?: string;
 };
 
+type ContentQuery = {
+  authorId?: string;
+  clubId?: string;
+  type?: "POST" | "ANNOUNCEMENT";
+  sortBy?: "createdAt" | "email";
+  sortOrder?: "asc" | "desc";
+  page?: number;
+  limit?: number;
+};
+
 const normalizeList = <T,>(data: unknown): T[] => {
   if (Array.isArray(data)) {
     return data as T[];
@@ -24,22 +34,37 @@ const normalizeList = <T,>(data: unknown): T[] => {
   return [];
 };
 
+const fetchContents = async <T,>(params: ContentQuery): Promise<T[]> => {
+  try {
+    const res = await api.get("/contents", { params });
+    return normalizeList<T>(res.data ?? []);
+  } catch {
+    return [];
+  }
+};
+
 const contentService = {
   getAnnouncements: async (clubId: string): Promise<Announcement[]> => {
-    try {
-      const res = await api.get(`/contents`, { params: { type: "ANNOUNCEMENT", clubId } });
-      return normalizeList<Announcement>(res.data ?? []);
-    } catch {
-      return [];
-    }
+    return fetchContents<Announcement>({ type: "ANNOUNCEMENT", clubId, sortBy: "createdAt", sortOrder: "desc" });
   },
   getPosts: async (clubId: string): Promise<ClubPost[]> => {
-    try {
-      const res = await api.get(`/contents`, { params: { type: "POST", clubId } });
-      return normalizeList<ClubPost>(res.data ?? []);
-    } catch {
-      return [];
-    }
+    return fetchContents<ClubPost>({ type: "POST", clubId, sortBy: "createdAt", sortOrder: "desc" });
+  },
+  getAnnouncementsByAuthor: async (authorId: string): Promise<Announcement[]> => {
+    return fetchContents<Announcement>({
+      type: "ANNOUNCEMENT",
+      authorId,
+      sortBy: "createdAt",
+      sortOrder: "desc",
+    });
+  },
+  getPostsByAuthor: async (authorId: string): Promise<ClubPost[]> => {
+    return fetchContents<ClubPost>({
+      type: "POST",
+      authorId,
+      sortBy: "createdAt",
+      sortOrder: "desc",
+    });
   },
   createContent: async (data: { title?: string; body: string; type: "POST" | "ANNOUNCEMENT"; authorId: string; clubId: string }) => {
     return api.post("/contents", data);
