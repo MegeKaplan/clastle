@@ -44,8 +44,8 @@ app.register(fastifyAutoload, {
 
 app.register(fastifyAutoload, {
   dir: join(__dirname, 'modules'),
-  matchFilter: (path) => path.endsWith("index.js"),
-  prefix: "/api"
+  matchFilter: (path) =>
+    path.endsWith("index.ts") || path.endsWith("index.js"), prefix: "/api"
 })
 
 app.after(() => {
