@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Edit, Save, X, Trash2, Shield, User as UserIcon, Plus, Minus } from "lucide-react";
+import { Edit, Save, X, Trash2, Shield, User as UserIcon } from "lucide-react";
 
 import EmptyStateCard from "@/components/EmptyStateCard";
 import SectionHeader from "@/components/SectionHeader";
@@ -14,12 +14,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import userService from "@/services/userService";
-import clubService from "@/services/clubService";
-
-type Club = {
-  id: string;
-  name: string;
-};
 
 type UserSummary = {
   id: string;
@@ -29,7 +23,7 @@ type UserSummary = {
   role?: string;
   status?: string;
   onboardingCompleted?: boolean;
-  clubs?: Club[];
+  clubs?: { id: string; name: string }[];
 };
 
 const normalizeStatus = (value?: string) => value?.trim().toUpperCase();
@@ -46,7 +40,6 @@ const formatStatusValue = (value: string) => value.toUpperCase();
 
 const UsersAdminPage = () => {
   const [users, setUsers] = useState<UserSummary[]>([]);
-  const [allClubs, setAllClubs] = useState<Club[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<UserSummary>>({});
@@ -55,10 +48,7 @@ const UsersAdminPage = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [usersRes, clubsRes] = await Promise.all([
-        userService.getUsers(),
-        clubService.getClubs()
-      ]);
+      const usersRes = await userService.getUsers();
       
       const usersData = (Array.isArray(usersRes.data?.data)
         ? usersRes.data.data
@@ -68,12 +58,10 @@ const UsersAdminPage = () => {
         ? usersRes.data
         : []).map((u: any) => ({
           ...u,
-          // Robust mapping if backend didn't map it already
           clubs: u.clubs || u.memberships?.map((m: any) => m.club) || []
         }));
         
       setUsers(usersData);
-      setAllClubs(clubsRes.data || []);
     } catch (err: any) {
       toast.error("Failed to load dashboard data");
     } finally {
@@ -111,17 +99,6 @@ const UsersAdminPage = () => {
     } finally {
       setIsSaving(false);
     }
-  };
-
-  const handleToggleClub = async (user: UserSummary, clubId: string, isMember: boolean) => {
-    // In a real scenario, an admin might use a dedicated admin endpoint to manage user memberships.
-    // Given the constraints (no new endpoints), and noticing that join/leave in clubService 
-    // uses the current user's ID on the backend, we might not have a direct way to manage 
-    // *others'* memberships unless there's an undocumented admin endpoint or a workaround.
-    // However, the prompt asks to implement this. We will assume the API might support it or 
-    // that we should provide the UI for it.
-    
-    toast.info("Membership management is currently scoped to your own account due to API limitations.");
   };
 
   return (
@@ -198,21 +175,10 @@ const UsersAdminPage = () => {
                       <td className="px-4 py-4">
                         <div className="flex flex-wrap gap-1.5">
                           {user.clubs?.map(club => (
-                            <Badge key={club.id} variant="outline" className="gap-1 bg-background">
+                            <Badge key={club.id} variant="outline" className="bg-background">
                               {club.name}
-                              {editingId === user.id && (
-                                <Minus 
-                                  className="size-3 cursor-pointer text-destructive hover:text-destructive/80" 
-                                  onClick={() => handleToggleClub(user, club.id, true)}
-                                />
-                              )}
                             </Badge>
                           ))}
-                          {editingId === user.id && (
-                            <Button variant="ghost" size="icon-xs" className="rounded-full bg-primary/10 text-primary">
-                              <Plus className="size-3" />
-                            </Button>
-                          )}
                           {!user.clubs?.length && !editingId && <span className="text-muted-foreground text-xs italic">No clubs</span>}
                         </div>
                       </td>

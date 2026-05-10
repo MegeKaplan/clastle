@@ -1,14 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Megaphone, Newspaper } from "lucide-react";
+import { Megaphone, Newspaper, Edit } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/components/AuthProvider";
+import { Button } from "@/components/ui/button";
 
 import EmptyStateCard from "@/components/EmptyStateCard";
 import RouteGuard from "@/components/RouteGuard";
 import SectionHeader from "@/components/SectionHeader";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useAuth } from "@/components/AuthProvider";
 import contentService, { Announcement, ClubPost } from "@/services/contentService";
 
 const formatDate = (value?: string) => {
@@ -20,15 +22,24 @@ const formatDate = (value?: string) => {
   });
 };
 
-const AnnouncementCard = ({ announcement }: { announcement: Announcement }) => {
+const AnnouncementCard = ({ announcement, currentUserId }: { announcement: Announcement; currentUserId?: string }) => {
+  const router = useRouter();
+
   return (
     <Card className="hover:shadow-md transition-shadow">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg font-semibold">{announcement.title}</CardTitle>
-        <CardDescription className="text-xs text-muted-foreground">
-          {formatDate(announcement.createdAt)}
-          {announcement.authorName ? ` • ${announcement.authorName}` : ""}
-        </CardDescription>
+      <CardHeader className="pb-3 flex items-start justify-between gap-3">
+        <div>
+          <CardTitle className="text-lg font-semibold cursor-pointer" onClick={() => router.push(`/announcement/${announcement.id}`)}>{announcement.title}</CardTitle>
+          <CardDescription className="text-xs text-muted-foreground">
+            {formatDate(announcement.createdAt)}
+            {announcement.authorName ? ` • ${announcement.authorName}` : ""}
+          </CardDescription>
+        </div>
+        {currentUserId && announcement.authorId === currentUserId ? (
+          <Button variant="ghost" size="icon-sm" onClick={() => router.push(`/edit/announcement/${announcement.id}`)}>
+            <Edit className="size-4" />
+          </Button>
+        ) : null}
       </CardHeader>
       <CardContent className="text-sm text-foreground leading-relaxed">
         {announcement.body}
@@ -37,15 +48,24 @@ const AnnouncementCard = ({ announcement }: { announcement: Announcement }) => {
   );
 };
 
-const PostCard = ({ post }: { post: ClubPost }) => {
+const PostCard = ({ post, currentUserId }: { post: ClubPost; currentUserId?: string }) => {
+  const router = useRouter();
+
   return (
     <Card className="hover:shadow-md transition-shadow">
-      <CardHeader className="pb-3">
-        <CardTitle className="text-lg font-semibold">{post.title}</CardTitle>
-        <CardDescription className="text-xs text-muted-foreground">
-          {formatDate(post.createdAt)}
-          {post.authorName ? ` • ${post.authorName}` : ""}
-        </CardDescription>
+      <CardHeader className="pb-3 flex items-start justify-between gap-3">
+        <div>
+          <CardTitle className="text-lg font-semibold cursor-pointer" onClick={() => router.push(`/post/${post.id}`)}>{post.title}</CardTitle>
+          <CardDescription className="text-xs text-muted-foreground">
+            {formatDate(post.createdAt)}
+            {post.authorName ? ` • ${post.authorName}` : ""}
+          </CardDescription>
+        </div>
+        {currentUserId && post.authorId === currentUserId ? (
+          <Button variant="ghost" size="icon-sm" onClick={() => router.push(`/edit/post/${post.id}`)}>
+            <Edit className="size-4" />
+          </Button>
+        ) : null}
       </CardHeader>
       <CardContent className="text-sm text-foreground leading-relaxed">
         {post.body}
@@ -112,7 +132,7 @@ export default function Home() {
           ) : announcements.length > 0 ? (
             <div className="grid gap-4 md:grid-cols-2">
               {announcements.map((announcement) => (
-                <AnnouncementCard key={announcement.id} announcement={announcement} />
+                <AnnouncementCard key={announcement.id} announcement={announcement} currentUserId={user?.id} />
               ))}
             </div>
           ) : (
@@ -139,7 +159,7 @@ export default function Home() {
           ) : posts.length > 0 ? (
             <div className="grid gap-4">
               {posts.map((post) => (
-                <PostCard key={post.id} post={post} />
+                <PostCard key={post.id} post={post} currentUserId={user?.id} />
               ))}
             </div>
           ) : (

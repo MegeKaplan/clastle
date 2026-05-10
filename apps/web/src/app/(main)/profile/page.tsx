@@ -9,6 +9,7 @@ import {
   Mail,
   Megaphone,
   Newspaper,
+  Edit,
   PencilLine,
   Sparkles,
   Users,
@@ -55,13 +56,20 @@ const ContentCard = ({
   item,
   badgeLabel,
   icon,
+  currentUserId,
 }: {
   item: Announcement | ClubPost;
   badgeLabel: string;
   icon: React.ReactNode;
+  currentUserId?: string;
 }) => {
+  const router = useRouter();
+
   return (
-    <Card className="overflow-hidden transition-shadow hover:shadow-lg">
+    <Card
+      className="overflow-hidden transition-shadow hover:shadow-lg cursor-pointer"
+      onClick={() => router.push(`/${badgeLabel.toLowerCase()}/${item.id}`)}
+    >
       <CardHeader className="space-y-3 pb-3">
         <div className="flex items-start justify-between gap-3">
           <div className="space-y-1">
@@ -75,9 +83,23 @@ const ContentCard = ({
               {item.title || "Untitled content"}
             </CardTitle>
           </div>
-          <Badge variant="outline" className="shrink-0">
-            {badgeLabel}
-          </Badge>
+          <div className="flex items-start gap-2">
+            <Badge variant="outline" className="shrink-0">
+              {badgeLabel}
+            </Badge>
+            {currentUserId && (item as any).authorId === currentUserId ? (
+              <Button
+                variant="ghost"
+                size="icon-sm"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  router.push(`/edit/${badgeLabel.toLowerCase()}/${item.id}`);
+                }}
+              >
+                <Edit className="size-4" />
+              </Button>
+            ) : null}
+          </div>
         </div>
       </CardHeader>
       <CardContent>

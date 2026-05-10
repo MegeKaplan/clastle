@@ -6,6 +6,7 @@ export type Announcement = {
   body: string;
   createdAt?: string;
   authorName?: string;
+  authorId?: string;
 };
 
 export type ClubPost = {
@@ -14,6 +15,7 @@ export type ClubPost = {
   body: string;
   createdAt?: string;
   authorName?: string;
+  authorId?: string;
 };
 
 type ContentQuery = {
@@ -68,6 +70,21 @@ const contentService = {
   },
   createContent: async (data: { title?: string; body: string; type: "POST" | "ANNOUNCEMENT"; authorId: string; clubId: string }) => {
     return api.post("/contents", data);
+  }
+  ,
+  getContent: async <T,>(id: string): Promise<T | null> => {
+    try {
+      const res = await api.get(`/contents/${id}`);
+      // Normalize response shapes: some endpoints return `{ data: item }`, others return item directly.
+      const payload = res.data as any;
+      if (payload == null) return null;
+      return (payload.data ?? payload) as T;
+    } catch {
+      return null;
+    }
+  },
+  updateContent: async (id: string, data: { title?: string; body?: string; expiresAt?: string | null; visibility?: string }) => {
+    return api.patch(`/contents/${id}`, data);
   }
 };
 
