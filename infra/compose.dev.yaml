@@ -1,0 +1,56 @@
+services:
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: clastle-pgadmin
+    restart: unless-stopped
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_DEFAULT_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_DEFAULT_PASSWORD}
+    ports:
+      - 5050:80
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - clastle-network
+    depends_on:
+      - postgres
+
+  api:
+    build: ../api
+    container_name: clastle-api-dev
+    restart: unless-stopped
+    working_dir: /app
+    command: npm run dev
+    volumes:
+      - ../api:/app
+      - /app/node_modules
+    ports:
+      - "3001:3001"
+    networks:
+      - clastle-network
+    env_file:
+      - ../api/.env.development
+
+  web:
+    build: ../web
+    container_name: clastle-web-dev
+    restart: unless-stopped
+    working_dir: /app
+    command: npm run dev
+    volumes:
+      - ../web:/app
+      - /app/node_modules
+      - /app/.next
+    ports:
+      - "3000:3000"
+    networks:
+      - clastle-network
+    env_file:
+      - ../web/.env.development
+
+volumes:
+  pgadmin_data:
+
+networks:
+  clastle-network:
+    driver: bridge

@@ -4,7 +4,6 @@ const nextConfig: NextConfig = {
   /* config options here */
   reactCompiler: true,
   output: "standalone",
-  assetPrefix: undefined,
 };
 
 export default nextConfig;

@@ -2,7 +2,7 @@ export const envSchema = {
   type: 'object',
   required: ['PORT'],
   properties: {
-    PORT: { type: 'string', default: 3001 },
+    PORT: { type: 'number', default: 3001 },
     JWT_SECRET: { type: "string" },
     COOKIE_SECRET: { type: "string" },
     REDIS_HOST: { type: "string" },
@@ -12,7 +12,7 @@ export const envSchema = {
 }
 
 export type Env = {
-  PORT: string
+  PORT: number
   JWT_SECRET: string
   COOKIE_SECRET: string
   REDIS_HOST: string

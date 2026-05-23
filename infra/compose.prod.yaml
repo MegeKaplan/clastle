@@ -1,0 +1,32 @@
+services:
+  api:
+    build:
+      context: ../api
+      target: prod
+    container_name: clastle-api
+    restart: unless-stopped
+    ports:
+      - "${API_PORT}:3001"
+    networks:
+      - clastle-network
+    env_file:
+      - ../api/.env.production
+
+  web:
+    build:
+      context: ../web
+      target: prod
+      args:
+        - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+    container_name: clastle-web
+    restart: unless-stopped
+    ports:
+      - "${WEB_PORT}:3000"
+    networks:
+      - clastle-network
+    env_file:
+      - ../web/.env.production
+
+networks:
+  clastle-network:
+    driver: bridge

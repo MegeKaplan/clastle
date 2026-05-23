@@ -1,34 +1,44 @@
-FROM node:20-alpine AS base
-WORKDIR /app
-RUN corepack enable
+FROM node:22-alpine AS base
 
-FROM base AS builder
+WORKDIR /app
+
+COPY package*.json ./
+
+RUN npm ci --include=dev
+
 COPY . .
-RUN npx turbo prune web --docker
-
-FROM base AS installer
-WORKDIR /app
-
-COPY --from=builder /app/out/json/ .
-COPY --from=builder /app/out/pnpm-lock.yaml ./pnpm-lock.yaml
-
-RUN pnpm install --frozen-lockfile
-
-COPY --from=builder /app/out/full/ .
-RUN pnpm turbo build --filter=web
 
 
-FROM node:20-alpine AS runner
-WORKDIR /app
-
-ENV NODE_ENV=production
-ENV PORT=3000
-ENV HOSTNAME="0.0.0.0"
-
-COPY --from=installer /app/apps/web/.next/standalone ./
-COPY --from=installer /app/apps/web/.next/static ./apps/web/.next/static
-# COPY --from=installer /app/apps/web/public ./apps/web/public
+FROM base AS dev
 
 EXPOSE 3000
 
-CMD ["node", "apps/web/server.js"]
+CMD ["npm", "run", "dev"]
+
+
+FROM base AS build
+
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+
+RUN npm run build
+
+
+FROM node:22-alpine AS prod
+
+WORKDIR /app
+
+ENV NODE_ENV=production
+
+COPY package*.json ./
+
+RUN npm ci --omit=dev
+
+COPY --from=build /app/public ./public
+COPY --from=build /app/.next ./.next
+COPY --from=build /app/node_modules ./node_modules
+COPY --from=build /app/package.json ./package.json
+
+EXPOSE 3000
+
+CMD ["npm", "start"]
