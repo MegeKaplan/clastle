@@ -24,6 +24,7 @@ cp -n api/.env.example api/.env.development
 cp -n api/.env.example api/.env.production
 cp -n web/.env.example web/.env.development
 cp -n web/.env.example web/.env.production
+cp -n infra/.env.example infra/.env
 echo "Created .env files. Update them before running."
 echo
 
